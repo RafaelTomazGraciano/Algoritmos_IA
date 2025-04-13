@@ -1,33 +1,32 @@
 package dijkstra;
 
-import arvore.Arvore;
+import grafo.No;
 
 import java.util.*;
 
 public class Dijkstra {
-    private List<Arvore> caminho;
+    private List<No> caminho;
 
     public Dijkstra() {
         caminho = new ArrayList<>();
     }
 
-    public Arvore busca(int destino, Arvore origem) {
-        Map<Arvore, Integer> distancia = new HashMap<>();
-        Map<Arvore, Arvore> predecessores = new HashMap<>();
-        Set<Arvore> visitados = new HashSet<>();
+    public No busca(String objetivo, No origem) {
+        Map<No, Integer> distancia = new HashMap<>();
+        Map<No, No> predecessores = new HashMap<>();
+        Set<No> visitados = new HashSet<>();
 
-        PriorityQueue<Arvore> fila = new PriorityQueue<>(Comparator.comparingInt(distancia::get));
+        PriorityQueue<No> fila = new PriorityQueue<>(Comparator.comparingInt(distancia::get));
 
-        // Inicialização
         distancia.put(origem, 0);
         fila.add(origem);
 
         while (!fila.isEmpty()) {
-            Arvore atual = fila.poll();
+            No atual = fila.poll();
 
             System.out.println("\nVisitando: " + atual.getValor());
 
-            if (atual.getValor() == destino) {
+            if (atual.getValor().equals(objetivo)) {
                 construirCaminho(predecessores, atual);
                 System.out.println("Destino encontrado: " + atual.getValor());
                 return atual;
@@ -35,27 +34,30 @@ public class Dijkstra {
 
             visitados.add(atual);
 
-            for (Arvore vizinho : atual.getFilhos()) {
+            for (Map.Entry<No, Integer> vizinhoEntry : atual.getVizinhos().entrySet()) {
+                No vizinho = vizinhoEntry.getKey();
+                int peso = vizinhoEntry.getValue();
+
                 if (visitados.contains(vizinho)) continue;
 
-                int custo = 1; // custo fixo
-                int novaDistancia = distancia.getOrDefault(atual, Integer.MAX_VALUE) + custo;
+                int novaDistancia = distancia.get(atual) + peso;
 
                 if (novaDistancia < distancia.getOrDefault(vizinho, Integer.MAX_VALUE)) {
                     distancia.put(vizinho, novaDistancia);
                     predecessores.put(vizinho, atual);
 
-                    if (fila.contains(vizinho)) fila.remove(vizinho);
+                    // Atualiza a fila de prioridade
+                    fila.remove(vizinho);
                     fila.add(vizinho);
 
                     System.out.println("Atualizando vizinho: " + vizinho.getValor());
-                    System.out.println("Nova distancia: " + novaDistancia);
+                    System.out.println("Nova distância: " + novaDistancia);
                 }
             }
 
             System.out.print("Fila atual: ");
-            for (Arvore a : fila) {
-                System.out.print(a.getValor() + "(d=" + distancia.get(a) + ") ");
+            for (No n : fila) {
+                System.out.print(n.getValor() + "(d=" + distancia.get(n) + ") ");
             }
             System.out.println();
         }
@@ -63,10 +65,9 @@ public class Dijkstra {
         return null;
     }
 
-    private void construirCaminho(Map<Arvore, Arvore> pai, Arvore objetivo) {
-        Deque<Arvore> pilha = new ArrayDeque<>();
-
-        Arvore atual = objetivo;
+    private void construirCaminho(Map<No, No> pai, No objetivo) {
+        Deque<No> pilha = new ArrayDeque<>();
+        No atual = objetivo;
         while (atual != null) {
             pilha.push(atual);
             atual = pai.get(atual);
@@ -78,8 +79,7 @@ public class Dijkstra {
         }
     }
 
-    public List<Arvore> getCaminho() {
+    public List<No> getCaminho() {
         return caminho;
     }
-
 }

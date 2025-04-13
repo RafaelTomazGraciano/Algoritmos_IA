@@ -1,15 +1,14 @@
 package bfs;
 
-import arvore.Arvore;
+import grafo.No;
 
 import java.util.*;
 
 public class BFS {
-
-    private Queue<Arvore> fila;
-    private Set<Arvore> visitados;
-    private Map<Arvore, Arvore> pai;
-    private List<Arvore> caminho;
+    private Queue<No> fila;
+    private Set<No> visitados;
+    private Map<No, No> pai;
+    private List<No> caminho;
 
     public BFS() {
         fila = new LinkedList<>();
@@ -18,7 +17,7 @@ public class BFS {
         caminho = new ArrayList<>();
     }
 
-    public Arvore busca(int valor, Arvore raiz) {
+    public No busca(String objetivo, No raiz) {
         fila.clear();
         visitados.clear();
         pai.clear();
@@ -29,24 +28,24 @@ public class BFS {
 
         while (!fila.isEmpty()) {
 
-            System.out.println("Fila atual: ");
-            for(Arvore arvore: fila){
-                System.out.println(arvore.getValor() + " ");
+            System.out.println("Fila atual:");
+            for (No no : fila) {
+                System.out.print(no.getValor() + " ");
             }
             System.out.println();
 
-            Arvore atual = fila.remove();
+            No atual = fila.remove();
 
-            if (atual.getValor() == valor) {
+            if (atual.getValor().equals(objetivo)) {
                 construirCaminho(pai, atual);
                 return atual;
             }
 
-            for (Arvore filho : atual.getFilhos()) {
-                if (!visitados.contains(filho)) {
-                    fila.add(filho);
-                    visitados.add(filho);
-                    pai.put(filho, atual);
+            for (No vizinho : atual.getVizinhos().keySet()) {
+                if (!visitados.contains(vizinho)) {
+                    fila.add(vizinho);
+                    visitados.add(vizinho);
+                    pai.put(vizinho, atual);
                 }
             }
         }
@@ -54,10 +53,9 @@ public class BFS {
         return null;
     }
 
-    private void construirCaminho(Map<Arvore, Arvore> pai, Arvore objetivo) {
-        Deque<Arvore> pilha = new ArrayDeque<>();
-
-        Arvore atual = objetivo;
+    private void construirCaminho(Map<No, No> pai, No objetivo) {
+        Deque<No> pilha = new ArrayDeque<>();
+        No atual = objetivo;
         while (atual != null) {
             pilha.push(atual);
             atual = pai.get(atual);
@@ -69,8 +67,7 @@ public class BFS {
         }
     }
 
-    public List<Arvore> getCaminho() {
+    public List<No> getCaminho() {
         return caminho;
     }
-
 }

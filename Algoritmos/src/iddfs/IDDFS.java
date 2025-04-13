@@ -1,26 +1,27 @@
 package iddfs;
 
-import arvore.Arvore;
+import grafo.Grafo;
+import grafo.No;
 
 import java.util.*;
 
 public class IDDFS {
 
-    private List<Arvore> caminho;
+    private List<No> caminho;
 
     public IDDFS() {
         caminho = new ArrayList<>();
     }
 
-    public Arvore busca(int valor, Arvore raiz) {
-        int profundidadeMaxima = calcularProfundidadeMaxima(raiz);
+    public No busca(String objetivo, No raiz, Grafo grafo) {
+        int profundidadeMaxima = calcularProfundidadeMaxima(raiz, grafo);
 
         for (int limite = 0; limite <= profundidadeMaxima; limite++) {
-            System.out.println();
-            Deque<Arvore> pilha = new ArrayDeque<>();
-            Map<Arvore, Integer> profundidades = new HashMap<>();
-            Map<Arvore, Arvore> pai = new HashMap<>();
-            Set<Arvore> visitados = new HashSet<>();
+            System.out.println("Profundidade limite: " + limite);
+            Deque<No> pilha = new ArrayDeque<>();
+            Map<No, Integer> profundidades = new LinkedHashMap<>();
+            Map<No, No> pai = new HashMap<>();
+            Set<No> visitados = new HashSet<>();
 
             pilha.push(raiz);
             profundidades.put(raiz, 0);
@@ -28,27 +29,24 @@ public class IDDFS {
             visitados.add(raiz);
 
             while (!pilha.isEmpty()) {
-                Arvore atual = pilha.pop();
+                No atual = pilha.pop();
                 int profundidadeAtual = profundidades.get(atual);
 
                 System.out.println("Visitando: " + atual.getValor() + " (profundidade " + profundidadeAtual + ")");
 
-                if (atual.getValor() == valor) {
+                if (atual.getValor().equals(objetivo)) {
                     construirCaminho(pai, atual);
                     return atual;
                 }
 
                 if (profundidadeAtual < limite) {
-                    List<Arvore> filhos = atual.getFilhos();
-                    ListIterator<Arvore> iterador = filhos.listIterator(filhos.size());
-
-                    while (iterador.hasPrevious()) {
-                        Arvore filho = iterador.previous();
-                        if (!visitados.contains(filho)) {
-                            pilha.push(filho);
-                            profundidades.put(filho, profundidadeAtual + 1);
-                            pai.put(filho, atual);
-                            visitados.add(filho);
+                    for (Map.Entry<No, Integer> vizinhoEntry : grafo.getVizinhos(atual).entrySet()) {
+                        No vizinho = vizinhoEntry.getKey();
+                        if (!visitados.contains(vizinho)) {
+                            pilha.push(vizinho);
+                            profundidades.put(vizinho, profundidadeAtual + 1);
+                            pai.put(vizinho, atual);
+                            visitados.add(vizinho);
                         }
                     }
                 }
@@ -58,10 +56,10 @@ public class IDDFS {
         return null;
     }
 
-    private void construirCaminho(Map<Arvore, Arvore> pai, Arvore objetivo) {
-        Deque<Arvore> pilha = new ArrayDeque<>();
+    private void construirCaminho(Map<No, No> pai, No objetivo) {
+        Deque<No> pilha = new ArrayDeque<>();
 
-        Arvore atual = objetivo;
+        No atual = objetivo;
         while (atual != null) {
             pilha.push(atual);
             atual = pai.get(atual);
@@ -73,19 +71,20 @@ public class IDDFS {
         }
     }
 
-    public List<Arvore> getCaminho() {
+    public List<No> getCaminho() {
         return caminho;
     }
 
-    private int calcularProfundidadeMaxima(Arvore raiz) {
-        if (raiz == null){
+    private int calcularProfundidadeMaxima(No raiz, Grafo grafo) {
+        if (raiz == null) {
             return 0;
         }
         int max = 0;
-        for (Arvore filho : raiz.getFilhos()) {
-            max = Math.max(max, calcularProfundidadeMaxima(filho));
+        for (Map.Entry<No, Integer> vizinhoEntry : grafo.getVizinhos(raiz).entrySet()) {
+            No vizinho = vizinhoEntry.getKey();  // Obtendo o nó vizinho
+            max = Math.max(max, calcularProfundidadeMaxima(vizinho, grafo));
         }
         return max + 1;
     }
-
 }
+

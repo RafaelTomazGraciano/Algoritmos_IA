@@ -1,15 +1,15 @@
 package dfs;
 
-import arvore.Arvore;
+import grafo.No;
 
 import java.util.*;
 
 public class DFS {
 
-    private Deque<Arvore> pilha;
-    private Set<Arvore> visitados;
-    private Map<Arvore, Arvore> pai;
-    private List<Arvore> caminho;
+    private Deque<No> pilha;
+    private Set<No> visitados;
+    private Map<No, No> pai;
+    private List<No> caminho;
 
     public DFS() {
         pilha = new ArrayDeque<>();
@@ -18,7 +18,7 @@ public class DFS {
         caminho = new ArrayList<>();
     }
 
-    public Arvore busca(int valor, Arvore raiz) {
+    public No busca(String objetivo, No raiz) {
         pilha.clear();
         visitados.clear();
         pai.clear();
@@ -30,33 +30,32 @@ public class DFS {
         while (!pilha.isEmpty()) {
 
             System.out.println("Pilha atual: ");
-            for(Arvore arvore: pilha){
-                System.out.println(arvore.getValor() + " ");
+            for(No No: pilha){
+                System.out.println(No.getValor() + " ");
             }
             System.out.println();
 
-            Arvore atual = pilha.pop();
+            No atual = pilha.pop();
 
-            if (atual.getValor() == valor) {
+            if (atual.getValor().equals(objetivo)) {
                 construirCaminho(pai, atual);
                 return atual;
             }
 
-            for (Arvore filho : atual.getFilhos()) {
-                if (!visitados.contains(filho)) {
-                    pilha.push(filho);
-                    visitados.add(filho);
-                    pai.put(filho, atual);
+            for (No vizinho : atual.getVizinhos().keySet()) {
+                if (!visitados.contains(vizinho)) {
+                    pilha.push(vizinho);
+                    visitados.add(vizinho);
+                    pai.put(vizinho, atual);
                 }
             }
         }
         return null;
     }
 
-    private void construirCaminho(Map<Arvore, Arvore> pai, Arvore objetivo) {
-        Deque<Arvore> pilha = new ArrayDeque<>();
-
-        Arvore atual = objetivo;
+    private void construirCaminho(Map<No, No> pai, No objetivo) {
+        Deque<No> pilha = new ArrayDeque<>();
+        No atual = objetivo;
         while (atual != null) {
             pilha.push(atual);
             atual = pai.get(atual);
@@ -68,7 +67,7 @@ public class DFS {
         }
     }
 
-    public List<Arvore> getCaminho() {
+    public List<No> getCaminho() {
         return caminho;
     }
 
